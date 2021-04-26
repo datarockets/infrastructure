@@ -68,6 +68,7 @@ module "kubernetes" {
       env = {
         QUEUES = "default:10"
       }
+      init_command = ["bin/rails", "db:migrate"]
     }
   }
   web_services = ["app", "api"]
