@@ -71,10 +71,13 @@ resource "kubernetes_deployment" "deployment" {
 
   metadata {
     name = each.key
-    labels = {
-      app = var.app
-      service = each.key
-    }
+    labels = merge(
+      {
+        app = var.app
+        service = each.key
+      },
+      each.value.deployment_labels != null ? each.value.deployment_labels : {}
+    )
     namespace = kubernetes_namespace.application.id
   }
 
@@ -87,10 +90,13 @@ resource "kubernetes_deployment" "deployment" {
     }
     template {
       metadata {
-        labels = {
-          app = var.app
-          service = each.key
-        }
+        labels = merge(
+          {
+            app = var.app
+            service = each.key
+          },
+          each.value.pod_labels != null ? each.value.pod_labels : {}
+        )
         namespace = kubernetes_namespace.application.id
       }
       spec {
@@ -133,10 +139,13 @@ resource "kubernetes_service" "service" {
 
   metadata {
     name = each.key
-    labels = {
-      app = var.app
-      service = each.key
-    }
+    labels = merge(
+      {
+        app = var.app
+        service = each.key
+      },
+      var.services[each.key].service_labels != null ? var.services[each.key].service_labels : {}
+    )
     namespace = kubernetes_namespace.application.id
   }
   spec {

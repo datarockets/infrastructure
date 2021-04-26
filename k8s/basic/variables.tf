@@ -13,6 +13,9 @@ variable "dcr_credentials" {
 variable "services" {
   type = map(
     object({
+      deployment_labels = optional(map(string))
+      service_labels = optional(map(string))
+      pod_labels = optional(map(string))
       replicas = number
       image = string
       ports = list(number)
