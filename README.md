@@ -50,7 +50,7 @@ module "kubernetes" {
     module.digitalocean
   ]
 
-  project = "sphere"
+  app = "sphere"
   email = "sphere@datarockets.com"
   dcr_credentials = module.digitalocean.dcr_credentials_k8s
   services = {

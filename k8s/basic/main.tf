@@ -20,7 +20,7 @@ terraform {
 
 resource "kubernetes_namespace" "application" {
   metadata {
-    name = var.project
+    name = var.app
   }
 }
 
@@ -72,6 +72,7 @@ resource "kubernetes_deployment" "deployment" {
   metadata {
     name = each.key
     labels = {
+      app = var.app
       service = each.key
     }
     namespace = kubernetes_namespace.application.id
@@ -87,6 +88,7 @@ resource "kubernetes_deployment" "deployment" {
     template {
       metadata {
         labels = {
+          app = var.app
           service = each.key
         }
         namespace = kubernetes_namespace.application.id
@@ -131,7 +133,10 @@ resource "kubernetes_service" "service" {
 
   metadata {
     name = each.key
-    labels = kubernetes_deployment.deployment[each.key].metadata[0].labels
+    labels = {
+      app = var.app
+      service = each.key
+    }
     namespace = kubernetes_namespace.application.id
   }
   spec {
