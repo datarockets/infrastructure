@@ -275,6 +275,9 @@ resource "kubernetes_ingress" "ingress" {
       },
       each.value.annotations
     )
+    labels = {
+      app = var.app
+    }
   }
   wait_for_load_balancer = true
   spec {
