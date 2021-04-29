@@ -141,6 +141,18 @@ resource "kubernetes_deployment" "deployment" {
               value = env.value
             }
           }
+
+          dynamic "env" {
+            for_each = each.value.env_from_field != null ? each.value.env_from_field : {}
+            content {
+              name = env.key
+              value_from {
+                field_ref {
+                  field_path = env.value
+                }
+              }
+            }
+          }
         }
 
         dynamic "init_container" {
@@ -166,6 +178,18 @@ resource "kubernetes_deployment" "deployment" {
               content {
                 name = env.key
                 value = env.value
+              }
+            }
+
+            dynamic "env" {
+              for_each = init_container.value.env_from_field != null ? each.value.env_from_field : {}
+              content {
+                name = env.key
+                value_from {
+                  field_ref {
+                    field_path = env.value
+                  }
+                }
               }
             }
           }

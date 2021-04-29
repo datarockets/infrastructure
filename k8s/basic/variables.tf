@@ -21,11 +21,13 @@ variable "services" {
       image = string
       ports = list(number)
       env_from_secrets = optional(list(string))
+      env_from_field = optional(map(string))
       env = optional(map(string))
       init_container = optional(object({
         image = optional(string)
         command = list(string)
         env_from_secrets = optional(list(string))
+        env_from_field = optional(map(string))
         env = optional(map(string))
       }))
     })
