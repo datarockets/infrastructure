@@ -13,7 +13,7 @@ Keep in mind that during the first run you won't have images in the registry yet
 Create `main.tf` in your repository:
 ```tf
 module "digitalocean" {
-  source = "git@github.com:datarockets/infrastructure.git//do/k8s?ref=v0.0.1"
+  source = "git@github.com:datarockets/infrastructure.git//do/k8s?ref=v0.1.0"
 
   project = "sphere"
   region = "tor1"
@@ -45,7 +45,7 @@ provider "helm" {
 }
 
 module "kubernetes" {
-  source = "git@github.com:datarockets/infrastructure.git//k8s/basic?ref=v0.0.1"
+  source = "git@github.com:datarockets/infrastructure.git//k8s/basic?ref=v0.1.0"
   depends_on = [
     module.digitalocean
   ]
