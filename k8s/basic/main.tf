@@ -100,6 +100,9 @@ resource "kubernetes_deployment" "deployment" {
         namespace = kubernetes_namespace.application.id
       }
       spec {
+        image_pull_secrets {
+          name = kubernetes_secret.docker-config.metadata[0].name
+        }
         container {
           name = each.key
           image = each.value.image
