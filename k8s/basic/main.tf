@@ -66,6 +66,15 @@ resource "helm_release" "cert-manager" {
   }
 }
 
+resource "kubernetes_service_account" "service_account" {
+  for_each = toset(compact(distinct([for name, service in var.services: service.service_account])))
+
+  metadata {
+    namespace = kubernetes_namespace.application.id
+    name = each.value
+  }
+}
+
 resource "kubernetes_deployment" "deployment" {
   for_each = var.services
 
@@ -100,6 +109,7 @@ resource "kubernetes_deployment" "deployment" {
         namespace = kubernetes_namespace.application.id
       }
       spec {
+        service_account_name = each.value.service_account != null ? kubernetes_service_account.service_account[each.value.service_account].metadata[0].name : "default"
         image_pull_secrets {
           name = kubernetes_secret.docker-config.metadata[0].name
         }

@@ -16,6 +16,7 @@ variable "services" {
       deployment_labels = optional(map(string))
       service_labels = optional(map(string))
       pod_labels = optional(map(string))
+      service_account = optional(string)
       replicas = number
       image = string
       ports = list(number)
