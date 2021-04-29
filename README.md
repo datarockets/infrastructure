@@ -66,9 +66,23 @@ module "kubernetes" {
       ports = [3000]
       env_from_secrets = ["sphere"]
       env = {
+        DB_POOL_SIZE = 16
+      }
+      init_container = {
+        command = ["bin/rails", "db:migrate"]
+        env_from_secrets = ["sphere"]
+        env = {
+          DB_POOL_SIZE = 1
+        }
+      }
+    }
+    worker = {
+      replicas = 1
+      image = "${module.digitalocean.dcr_endpoint}/worker:latest"
+      ports = []
+      env = {
         QUEUES = "default:10"
       }
-      init_command = ["bin/rails", "db:migrate"]
     }
   }
   web_services = ["app", "api"]
@@ -98,6 +112,7 @@ module "kubernetes" {
   secrets = {
     sphere = {
       DB_HOST = module.digitalocean.db_host
+      DB_PORT = module.digitalocean.db_port
       DB_USER = module.digitalocean.db_user
       DB_PASSWORD = module.digitalocean.db_password
       DB_DATABASE = module.digitalocean.db_database
