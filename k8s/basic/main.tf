@@ -144,15 +144,15 @@ resource "kubernetes_deployment" "deployment" {
         }
 
         dynamic "init_container" {
-          for_each = each.value.init_command != null ? {(each.key) = each.value} : {}
+          for_each = each.value.init_container != null ? [each.value.init_container] : []
 
           content {
             name = "${each.key}-init-container"
-            image = each.value.image
-            command = each.value.init_command
+            image = init_container.value.image != null ? init_container.value.image : each.value.image
+            command = init_container.value.command
 
             dynamic "env_from" {
-              for_each = each.value.env_from_secrets != null ? each.value.env_from_secrets : []
+              for_each = init_container.value.env_from_secrets != null ? init_container.value.env_from_secrets : []
               content {
                 secret_ref {
                   name = kubernetes_secret.secret[env_from.value].metadata[0].name
@@ -162,7 +162,7 @@ resource "kubernetes_deployment" "deployment" {
             }
 
             dynamic "env" {
-              for_each = each.value.env != null ? each.value.env : {}
+              for_each = init_container.value.env != null ? init_container.value.env : {}
               content {
                 name = env.key
                 value = env.value
