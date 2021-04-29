@@ -19,6 +19,10 @@ output "db_host" {
   value = digitalocean_database_cluster.main.private_host
 }
 
+output "db_port" {
+  value = digitalocean_database_cluster.main.port
+}
+
 output "db_user" {
   value = digitalocean_database_user.db_user.name
 }
