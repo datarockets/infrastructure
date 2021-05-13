@@ -20,13 +20,15 @@ resource "kubernetes_secret" "secret" {
 }
 
 resource "kubernetes_secret" "docker-config" {
+  for_each = var.dcr_credentials != "" ? toset([var.dcr_credentials]) : []
+
   metadata {
     name = "docker-config"
     namespace = kubernetes_namespace.application.id
   }
 
   data = {
-    ".dockerconfigjson" = var.dcr_credentials
+    ".dockerconfigjson" = each.value
   }
   type = "kubernetes.io/dockerconfigjson"
 }
@@ -76,8 +78,11 @@ resource "kubernetes_deployment" "deployment" {
       spec {
         service_account_name = each.value.service_account != null ? kubernetes_service_account.service_account[each.value.service_account].metadata[0].name : "default"
 
-        image_pull_secrets {
-          name = kubernetes_secret.docker-config.metadata[0].name
+        dynamic "image_pull_secrets" {
+          for_each = var.dcr_credentials != "" ? toset([var.dcr_credentials]) : []
+          content {
+            name = kubernetes_secret.docker-config.metadata[0].name
+          }
         }
 
         container {

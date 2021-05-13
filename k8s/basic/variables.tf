@@ -8,6 +8,7 @@ variable "email" {
 
 variable "dcr_credentials" {
   type = string
+  default = ""
 }
 
 variable "services" {
