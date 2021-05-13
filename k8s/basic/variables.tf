@@ -21,8 +21,10 @@ variable "web_services" {
 
 variable "secrets" {
   type = map(map(any))
+  default = {}
 }
 
 variable "ingresses" {
   type = map(any)
+  default = {}
 }
