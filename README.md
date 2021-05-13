@@ -120,3 +120,12 @@ module "kubernetes" {
   }
 }
 ```
+
+## Caveats
+
+The configuration above will probably fail due to limitations of kubernetes-alpha provider: we try to create an Issuer using kubernetes-alpha and it raises an error because there are no CRD Issuer before we install cert-manager helm chart. Therefore, in order to apply the terraform config above you would need to apply it via multiple steps:
+```
+terraform apply -target=module.digitalocean
+terraform apply -target=module.kubernetes.module.dependencies
+terraform apply
+```

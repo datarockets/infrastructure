@@ -2,7 +2,7 @@ locals {
   host_to_ips = transpose({
     for ip, hosts in {
       for name, config in var.ingresses :
-        kubernetes_ingress.ingress[name].status[0].load_balancer[0].ingress[0].ip => kubernetes_ingress.ingress[name].spec[*].rule[*].host...
+        module.ingress[name].ip => module.ingress[name].hosts
     } : ip => flatten(hosts)
   })
 }
