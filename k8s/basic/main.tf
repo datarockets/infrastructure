@@ -229,6 +229,9 @@ resource "kubernetes_service" "service" {
 
 resource "kubernetes_manifest" "cert-issuer-letsencrypt" {
   provider = kubernetes-alpha
+  depends_on = [
+    helm_release.cert-manager
+  ]
 
   manifest = {
     apiVersion = "cert-manager.io/v1"
