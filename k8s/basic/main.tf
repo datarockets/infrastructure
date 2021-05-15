@@ -19,6 +19,7 @@ terraform {
 
 module "dependencies" {
   source = "./dependencies"
+  nginx_ingress_helm_chart_options = var.nginx_ingress_helm_chart_options
 }
 
 module "cluster" {

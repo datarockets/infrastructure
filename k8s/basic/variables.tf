@@ -28,3 +28,12 @@ variable "ingresses" {
   type = map(any)
   default = {}
 }
+
+variable "nginx_ingress_helm_chart_options" {
+  type = list(object({
+    name = string
+    value = string
+  }))
+
+  default = []
+}
