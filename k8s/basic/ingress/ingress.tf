@@ -7,9 +7,7 @@ resource "kubernetes_ingress" "ingress" {
     name = var.name
     namespace = var.app
     annotations = merge(
-      {
-        "cert-manager.io/issuer" = "letsencrypt"
-      },
+      var.ingress.disable_tls == true ? {} : {"cert-manager.io/issuer" = "letsencrypt"},
       var.ingress.annotations
     )
     labels = {
@@ -19,9 +17,13 @@ resource "kubernetes_ingress" "ingress" {
   wait_for_load_balancer = true
   spec {
     ingress_class_name = "nginx"
-    tls {
-      hosts = var.ingress.rules[*].host
-      secret_name = "letsencrypt-tls-${var.name}"
+    dynamic "tls" {
+      for_each = var.ingress.disable_tls == true ? [] : toset(["enable"])
+
+      content {
+        hosts = var.ingress.rules[*].host
+        secret_name = "letsencrypt-tls-${var.name}"
+      }
     }
     dynamic "rule" {
       for_each = var.ingress.rules

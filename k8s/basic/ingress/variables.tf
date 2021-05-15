@@ -8,6 +8,7 @@ variable "name" {
 
 variable "ingress" {
   type = object({
+    disable_tls = optional(bool)
     annotations = map(any)
     rules = list(object({
       host = string
