@@ -12,7 +12,28 @@ variable "dcr_credentials" {
 }
 
 variable "services" {
-  type = map(any)
+  type = map(
+    object({
+      deployment_labels = optional(map(string))
+      service_labels = optional(map(string))
+      pod_labels = optional(map(string))
+      service_account = optional(string)
+      replicas = number
+      image = string
+      ports = list(number)
+      env_from_secrets = optional(list(string))
+      env_from_field = optional(map(string))
+      env = optional(map(string))
+      init_container = optional(object({
+        image = optional(string)
+        command = list(string)
+        env_from_secrets = optional(list(string))
+        env_from_field = optional(map(string))
+        env = optional(map(string))
+      }))
+    })
+  )
+  default = {}
 }
 
 variable "web_services" {
@@ -25,7 +46,20 @@ variable "secrets" {
 }
 
 variable "ingresses" {
-  type = map(any)
+  type = map(
+    object({
+      disable_tls = optional(bool)
+      annotations = map(any)
+      rules = list(object({
+        host = string
+        paths = list(object({
+          path = string
+          service = optional(string)
+          port = optional(number)
+        }))
+      }))
+    })
+  )
   default = {}
 }
 
