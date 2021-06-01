@@ -45,3 +45,9 @@ resource "aws_ecr_lifecycle_policy" "keep_last_10" {
     ]
   })
 }
+
+output "ecr_repository_urls" {
+  value = {for name in var.ecr_repositories:
+    name => aws_ecr_repository.ecr_repository[name].repository_url
+  }
+}
