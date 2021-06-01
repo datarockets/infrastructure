@@ -37,10 +37,6 @@ variable "eks_private_subnets_cidr_blocks" {
 
 variable "database_subnets" {
   type = map(string)
-  default = {
-    "10.0.51.0/24" = "${var.region}a"
-    "10.0.52.0/24" = "${var.region}b"
-  }
 }
 
 variable "eks" {
@@ -57,12 +53,12 @@ resource "aws_subnet" "database" {
   availability_zone = each.value
 
   tags = {
-    Name = "${var.app}-database"
+    Name = "${var.app}-${var.environment}-database"
   }
 }
 
 resource "aws_security_group" "database" {
-  name = "database"
+  name = "${var.app}-${var.environment}-eks-database"
   description = "Allow resources from EKS private subnets to access RDS database"
   vpc_id = var.vpc_id
 
@@ -89,7 +85,7 @@ module "rds" {
   source  = "terraform-aws-modules/rds/aws"
   version = "3.0.0"
 
-  identifier = var.app
+  identifier = "${var.app}-${var.environment}"
 
   engine = "postgres"
   family = "postgres12"
@@ -99,6 +95,7 @@ module "rds" {
   allocated_storage = 10
 
   backup_window = "03:00-06:00"
+  backup_retention_period = 15
   maintenance_window = "Mon:00:00-Mon:03:00"
 
   name = "main"
@@ -149,7 +146,6 @@ resource "null_resource" "database" {
     command = <<-EOC
     set -e
 
-    AWS_PROFILE=<aws-profile-here>
     aws eks --region ${var.region} update-kubeconfig --name ${var.eks.cluster_name}
 
     cat << JOB | kubectl -n ${var.app} apply -f -
