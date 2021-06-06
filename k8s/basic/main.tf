@@ -23,12 +23,26 @@ module "dependencies" {
   nginx_ingress_helm_chart_options = var.nginx_ingress_helm_chart_options
 }
 
+resource "kubernetes_namespace" "app" {
+  count = var.create_app_namespace ? 1 : 0
+
+  metadata {
+    name = var.app
+  }
+}
+
+locals {
+  app_namespace = var.create_app_namespace ? kubernetes_namespace.app[0].id : var.app_namespace
+}
+
 module "cluster" {
   depends_on = [
     module.dependencies
   ]
 
   source = "./cluster"
+
+  app_namespace = local.app_namespace
 
   app = var.app
   email = var.email
@@ -46,6 +60,8 @@ module "ingress" {
   ]
 
   source = "./ingress"
+
+  app_namespace = local.app_namespace
 
   app = var.app
   name = each.key

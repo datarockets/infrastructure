@@ -2,18 +2,12 @@ terraform {
   experiments = [module_variable_optional_attrs]
 }
 
-resource "kubernetes_namespace" "application" {
-  metadata {
-    name = var.app
-  }
-}
-
 resource "kubernetes_secret" "secret" {
   for_each = var.secrets
 
   metadata {
     name = each.key
-    namespace = kubernetes_namespace.application.id
+    namespace = var.app_namespace
   }
 
   data = each.value
@@ -24,7 +18,7 @@ resource "kubernetes_secret" "docker-config" {
 
   metadata {
     name = "docker-config"
-    namespace = kubernetes_namespace.application.id
+    namespace = var.app_namespace
   }
 
   data = {
@@ -37,7 +31,7 @@ resource "kubernetes_service_account" "service_account" {
   for_each = toset(compact(distinct([for name, service in var.services: service.service_account])))
 
   metadata {
-    namespace = kubernetes_namespace.application.id
+    namespace = var.app_namespace
     name = each.value
   }
 }
@@ -54,7 +48,7 @@ resource "kubernetes_deployment" "deployment" {
       },
       each.value.deployment_labels != null ? each.value.deployment_labels : {}
     )
-    namespace = kubernetes_namespace.application.id
+    namespace = var.app_namespace
   }
 
   spec {
@@ -73,7 +67,7 @@ resource "kubernetes_deployment" "deployment" {
           },
           each.value.pod_labels != null ? each.value.pod_labels : {}
         )
-        namespace = kubernetes_namespace.application.id
+        namespace = var.app_namespace
       }
       spec {
         service_account_name = each.value.service_account != null ? kubernetes_service_account.service_account[each.value.service_account].metadata[0].name : "default"
@@ -183,7 +177,7 @@ resource "kubernetes_service" "service" {
       },
       var.services[each.key].service_labels != null ? var.services[each.key].service_labels : {}
     )
-    namespace = kubernetes_namespace.application.id
+    namespace = var.app_namespace
   }
   spec {
     type = "ClusterIP"
@@ -207,7 +201,7 @@ resource "kubernetes_manifest" "cert-issuer-letsencrypt" {
     kind       = "Issuer"
     metadata = {
       name      = "letsencrypt"
-      namespace = kubernetes_namespace.application.id
+      namespace = var.app_namespace
     }
     spec = {
       acme = {

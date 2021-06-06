@@ -5,7 +5,7 @@ terraform {
 resource "kubernetes_ingress" "ingress" {
   metadata {
     name = var.name
-    namespace = var.app
+    namespace = var.app_namespace
     annotations = merge(
       var.ingress.disable_tls == true ? {} : {"cert-manager.io/issuer" = "letsencrypt"},
       var.ingress.annotations
