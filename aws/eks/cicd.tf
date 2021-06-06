@@ -63,7 +63,7 @@ resource "aws_iam_user_policy_attachment" "cicd" {
 
 resource "kubernetes_role" "cicd" {
   metadata {
-    namespace = var.app
+    namespace = kubernetes_namespace.app.id
     name = "cicd"
     labels = {
       app = var.app
@@ -79,7 +79,7 @@ resource "kubernetes_role" "cicd" {
 
 resource "kubernetes_role_binding" "cicd" {
   metadata {
-    namespace = var.app
+    namespace = kubernetes_namespace.app.id
     name = "cicd"
     labels = {
       app = var.app

@@ -19,3 +19,13 @@ variable "app" {
 variable "environment" {
   type = string
 }
+
+resource "kubernetes_namespace" "app" {
+  metadata {
+    name = var.app
+  }
+}
+
+output "app_namespace" {
+  value = kubernetes_namespace.app.id
+}
