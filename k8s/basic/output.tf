@@ -2,7 +2,7 @@ locals {
   host_to_ips = transpose({
     for ip, hosts in {
       for name, config in var.ingresses :
-        module.ingress[name].ip => module.ingress[name].hosts
+        module.ingress[name].ip => module.ingress[name].hosts...
     } : ip => flatten(hosts)
   })
 }
