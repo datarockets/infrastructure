@@ -45,6 +45,7 @@ module "eks" {
 
   node_groups = {
     default = {
+      name_prefix = "default"
       instance_types = ["t3.small"]
       subnets = module.vpc.private_subnets
       disk_size = 20
