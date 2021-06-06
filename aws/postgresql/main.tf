@@ -148,7 +148,7 @@ resource "null_resource" "database" {
 
     aws eks --region ${var.region} update-kubeconfig --name ${var.eks.cluster_name}
 
-    cat << JOB | kubectl -n ${var.app} apply -f -
+    cat << JOB | kubectl -n default apply -f -
     apiVersion: batch/v1
     kind: Job
     metadata:
@@ -183,8 +183,8 @@ resource "null_resource" "database" {
       backoffLimit: 0
     JOB
 
-    kubectl -n ${var.app} wait --for=condition=complete jobs/database-creator
-    kubectl -n ${var.app} delete jobs/database-creator
+    kubectl -n default wait --for=condition=complete jobs/database-creator
+    kubectl -n default delete jobs/database-creator
     EOC
   }
 }
