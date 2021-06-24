@@ -119,6 +119,14 @@ resource "kubernetes_deployment" "deployment" {
               }
             }
           }
+
+          dynamic "volume_mount" {
+            for_each = each.value.mount_secrets
+            content {
+              name = volume_mount.key
+              mount_path = volume_mount.value
+            }
+          }
         }
 
         dynamic "init_container" {
@@ -157,6 +165,25 @@ resource "kubernetes_deployment" "deployment" {
                   }
                 }
               }
+            }
+
+            dynamic "volume_mount" {
+              for_each = init_container.value.mount_secrets
+              content {
+                name = volume_mount.key
+                mount_path = volume_mount.value
+              }
+            }
+          }
+        }
+
+        dynamic "volume" {
+          for_each = each.value.mount_secrets
+
+          content {
+            name = volume.key
+            secret {
+              secret_name = volume.key
             }
           }
         }
