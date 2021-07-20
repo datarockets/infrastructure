@@ -28,11 +28,12 @@ resource "kubernetes_secret" "docker-config" {
 }
 
 resource "kubernetes_service_account" "service_account" {
-  for_each = toset(compact(distinct([for name, service in var.services: service.service_account])))
+  for_each = {for name, service in var.services: service.service_account.name => service.service_account}
 
   metadata {
     namespace = var.app_namespace
-    name = each.value
+    name = each.value.name
+    annotations = each.value.annotations
   }
 }
 
@@ -70,7 +71,7 @@ resource "kubernetes_deployment" "deployment" {
         namespace = var.app_namespace
       }
       spec {
-        service_account_name = each.value.service_account != null ? kubernetes_service_account.service_account[each.value.service_account].metadata[0].name : "default"
+        service_account_name = each.value.service_account.name != null ? kubernetes_service_account.service_account[each.value.service_account.name].metadata[0].name : "default"
 
         dynamic "image_pull_secrets" {
           for_each = var.dcr_credentials != "" ? { default = var.dcr_credentials } : {}
