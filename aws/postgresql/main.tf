@@ -83,7 +83,7 @@ resource "aws_security_group" "database" {
 
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
-  version = "3.0.0"
+  version = "3.3.0"
 
   identifier = "${var.app}-${var.environment}"
 
