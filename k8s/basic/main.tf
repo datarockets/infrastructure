@@ -47,6 +47,7 @@ module "cluster" {
   app = var.app
   email = var.email
   dcr_credentials = var.dcr_credentials
+  service_accounts = var.service_accounts
   services = var.services
   web_services = var.web_services
   secrets = var.secrets

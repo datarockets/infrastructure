@@ -21,10 +21,7 @@ variable "services" {
       deployment_labels = optional(map(string))
       service_labels = optional(map(string))
       pod_labels = optional(map(string))
-      service_account = optional(object({
-        name = optional(string)
-        annotations = optional(map(string))
-      }))
+      service_account = optional(string)
       replicas = number
       image = string
       ports = list(number)
@@ -50,4 +47,11 @@ variable "web_services" {
 
 variable "secrets" {
   type = map(map(any))
+}
+
+variable "service_accounts" {
+  type = map(object({
+    annotations = map(string)
+  }))
+  default = {}
 }

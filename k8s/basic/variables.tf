@@ -27,10 +27,7 @@ variable "services" {
       deployment_labels = optional(map(string))
       service_labels = optional(map(string))
       pod_labels = optional(map(string))
-      service_account = optional(object({
-        name = optional(string)
-        annotations = optional(map(string))
-      }))
+      service_account = optional(string)
       replicas = number
       image = string
       ports = list(number)
@@ -85,4 +82,11 @@ variable "nginx_ingress_helm_chart_options" {
   }))
 
   default = []
+}
+
+variable "service_accounts" {
+  type = map(object({
+    annotations = map(string)
+  }))
+  default = {}
 }
