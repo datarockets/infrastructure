@@ -7,7 +7,10 @@ resource "kubernetes_ingress" "ingress" {
     name = var.name
     namespace = var.app_namespace
     annotations = merge(
-      var.ingress.disable_tls == true ? {} : {"cert-manager.io/issuer" = "letsencrypt"},
+      var.ingress.disable_tls == true ? {} : {
+        "cert-manager.io/issuer" = "letsencrypt"
+        "acme.cert-manager.io/http01-edit-in-place" = "true"
+      },
       var.ingress.annotations
     )
     labels = {
