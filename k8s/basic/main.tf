@@ -12,7 +12,7 @@ terraform {
 
     helm = {
       source = "hashicorp/helm"
-      version = "~> 2.1"
+      version = "~> 2.2.0"
     }
   }
   experiments = [module_variable_optional_attrs]
