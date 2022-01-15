@@ -102,7 +102,7 @@ resource "kubernetes_deployment" "deployment" {
           command = each.value.command
 
           dynamic "port" {
-            for_each = each.value.ports
+            for_each = each.value.ports != null ? each.value.ports : []
             content {
               container_port = port.value
             }
