@@ -238,8 +238,6 @@ resource "kubernetes_service" "service" {
 }
 
 resource "kubernetes_manifest" "cert-issuer-letsencrypt" {
-  provider = kubernetes-alpha
-
   manifest = {
     apiVersion = "cert-manager.io/v1"
     kind       = "Issuer"
