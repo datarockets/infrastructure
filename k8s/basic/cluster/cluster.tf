@@ -88,7 +88,7 @@ resource "kubernetes_deployment" "deployment" {
       }
       spec {
         service_account_name = each.value.service_account != null ? kubernetes_service_account.service_account[each.value.service_account].metadata[0].name : "default"
-
+        termination_grace_period_seconds = each.value.termination_grace_period_seconds
         dynamic "image_pull_secrets" {
           for_each = var.dcr_credentials != "" ? { default = var.dcr_credentials } : {}
           content {

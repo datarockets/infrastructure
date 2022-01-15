@@ -31,6 +31,7 @@ variable "services" {
       replicas = number
       image = string
       ports = list(number)
+      termination_grace_period_seconds = optional(number)
       command = optional(list(string))
       env_from_secrets = optional(list(string))
       env_from_field = optional(map(string))
