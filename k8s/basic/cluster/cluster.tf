@@ -99,6 +99,7 @@ resource "kubernetes_deployment" "deployment" {
         container {
           name = each.key
           image = each.value.image
+          command = each.value.command
 
           dynamic "port" {
             for_each = each.value.ports
