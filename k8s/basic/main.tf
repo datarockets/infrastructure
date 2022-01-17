@@ -19,15 +19,9 @@ module "dependencies" {
 }
 
 resource "kubernetes_namespace" "app" {
-  count = var.create_app_namespace ? 1 : 0
-
   metadata {
     name = var.app
   }
-}
-
-locals {
-  app_namespace = var.create_app_namespace ? kubernetes_namespace.app[0].id : var.app_namespace
 }
 
 module "cluster" {
@@ -37,7 +31,7 @@ module "cluster" {
 
   source = "./cluster"
 
-  app_namespace = local.app_namespace
+  app_namespace = kubernetes_namespace.app.id
 
   app = var.app
   email = var.email
@@ -57,7 +51,7 @@ module "ingress" {
 
   source = "./ingress"
 
-  app_namespace = local.app_namespace
+  app_namespace = kubernetes_namespace.app.id
 
   app = var.app
   name = each.key

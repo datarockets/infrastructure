@@ -1,9 +1,18 @@
-variable "cluster_version" {
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
+}
+
+variable "app" {
   type = string
 }
 
-variable "masters_aws_groups" {
-  type = set(string)
+variable "environment" {
+  type = string
 }
 
 variable "vpc_cidr" {
@@ -15,29 +24,14 @@ variable "azs" {
   type = list(string)
 }
 
-data "aws_iam_group" "masters_groups" {
-  for_each = var.masters_aws_groups
-
-  group_name = each.value
+variable "cluster_version" {
+  type = string
 }
 
-locals {
-  masters_aws_users = flatten([for group in data.aws_iam_group.masters_groups :
-    [for user in group.users :
-      {
-        userarn = user.arn
-        username = user.user_name
-        groups = ["system:masters"]
-      }
-    ]
-  ])
-  cicd_users = [
-    {
-      userarn = aws_iam_user.cicd.arn
-      username = aws_iam_user.cicd.name
-      groups = ["cicd"]
-    }
-  ]
+variable "legacy_iam_role_name" {
+  type = string
+  default = ""
+}
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
@@ -55,17 +49,18 @@ module "vpc" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
+  version = "18.2.0"
 
   cluster_name = "${var.app}-${var.environment}"
   cluster_version = var.cluster_version
 
   vpc_id = module.vpc.vpc_id
-  subnets = concat(module.vpc.private_subnets, module.vpc.public_subnets)
+  subnet_ids = concat(module.vpc.private_subnets, module.vpc.public_subnets)
 
   cluster_enabled_log_types = ["authenticator", "controllerManager", "scheduler"]
-  cluster_log_retention_in_days = 7
+  cloudwatch_log_group_retention_in_days = 7
 
-  node_groups = {
+  eks_managed_node_groups = {
     default = {
       name_prefix = "default"
       instance_types = ["t3.small"]
@@ -78,9 +73,15 @@ module "eks" {
     }
   }
 
-  map_users = concat(local.masters_aws_users, local.cicd_users)
-
-  write_kubeconfig = false
+  # Arguments for upgradeability.
+  # We can't modify cluster role name or security group w/o cluster recreation.
+  # Se we try to maintain old role and security group name in order to avoid
+  # cluster recreation.
+  prefix_separator = ""
+  iam_role_use_name_prefix = false
+  iam_role_name = var.legacy_iam_role_name
+  cluster_security_group_name = "${var.app}-${var.environment}"
+  cluster_security_group_description = "EKS cluster security group."
 }
 
 output "vpc_id" {
@@ -91,10 +92,26 @@ output "cluster_id" {
   value = module.eks.cluster_id
 }
 
+output "cluster_arn" {
+  value = module.eks.cluster_arn
+}
+
 output "private_cidr_blocks" {
   value = module.vpc.private_subnets_cidr_blocks
 }
 
 output "public_cidr_blocks" {
   value = module.vpc.public_subnets_cidr_blocks
+}
+
+output "node_security_group_id" {
+  value = module.eks.node_security_group_id
+}
+
+output "aws_auth_configmap_yaml" {
+  value = module.eks.aws_auth_configmap_yaml
+}
+
+output "eks_managed_node_group_default_iam_role_arn" {
+  value = module.eks.eks_managed_node_groups.default.iam_role_arn
 }

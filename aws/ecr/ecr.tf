@@ -1,18 +1,26 @@
-variable "ecr_repositories" {
+variable "app" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "repositories" {
   type = set(string)
   default = []
 }
 
-resource "aws_ecr_repository" "ecr_repository" {
-  for_each = var.ecr_repositories
+resource "aws_ecr_repository" "repository" {
+  for_each = var.repositories
 
   name = "${var.app}/${var.environment}/${each.value}"
 }
 
 resource "aws_ecr_lifecycle_policy" "keep_last_10" {
-  for_each = var.ecr_repositories
+  for_each = var.repositories
 
-  repository = aws_ecr_repository.ecr_repository[each.key].name
+  repository = aws_ecr_repository.repository[each.key].name
 
   policy = jsonencode({
     rules = [
@@ -46,8 +54,14 @@ resource "aws_ecr_lifecycle_policy" "keep_last_10" {
   })
 }
 
-output "ecr_repository_urls" {
-  value = {for name in var.ecr_repositories:
-    name => aws_ecr_repository.ecr_repository[name].repository_url
+output "repository_urls" {
+  value = {for name in var.repositories:
+    name => aws_ecr_repository.repository[name].repository_url
   }
+}
+
+output "repository_arns" {
+  value = [for name in var.repositories:
+    aws_ecr_repository.repository[name].arn
+  ]
 }

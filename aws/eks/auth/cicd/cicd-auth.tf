@@ -1,3 +1,32 @@
+terraform {
+  required_providers {
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+      version = "~> 2.7"
+    }
+  }
+}
+
+variable "app" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "cluster_arn" {
+  type = string
+}
+
+variable "kubernetes_app_namespace" {
+  type = string
+}
+
+variable "ecr_repository_arns" {
+  type = list(string)
+}
+
 resource "aws_iam_user" "cicd" {
   name = "cicd"
   path = "/automation/${var.app}/${var.environment}/"
@@ -36,14 +65,14 @@ resource "aws_iam_policy" "cicd" {
           "ecr:UploadLayerPart",
         ]
         Effect   = "Allow"
-        Resource = [for repo in var.ecr_repositories: "arn:aws:ecr:*:*:repository/${var.app}/${var.environment}/${repo}"]
+        Resource = var.ecr_repository_arns
       },
       {
         Action = [
           "eks:DescribeCluster"
         ]
         Effect = "Allow"
-        Resource = [module.eks.cluster_arn]
+        Resource = [var.cluster_arn]
       },
       {
         Action = [
@@ -63,7 +92,7 @@ resource "aws_iam_user_policy_attachment" "cicd" {
 
 resource "kubernetes_role" "cicd" {
   metadata {
-    namespace = kubernetes_namespace.app.id
+    namespace = var.kubernetes_app_namespace
     name = "cicd"
     labels = {
       app = var.app
@@ -79,7 +108,7 @@ resource "kubernetes_role" "cicd" {
 
 resource "kubernetes_role_binding" "cicd" {
   metadata {
-    namespace = kubernetes_namespace.app.id
+    namespace = var.kubernetes_app_namespace
     name = "cicd"
     labels = {
       app = var.app
@@ -99,11 +128,22 @@ resource "kubernetes_role_binding" "cicd" {
   }
 }
 
-output "cicd_key_id" {
+output "iam_user" {
+  value = {
+    arn = aws_iam_user.cicd.arn
+    name = aws_iam_user.cicd.name
+  }
+}
+
+output "iam_user_key_id" {
   value = aws_iam_access_key.cicd.id
 }
 
-output "cicd_key_secret" {
+output "iam_user_key_secret" {
   value = aws_iam_access_key.cicd.secret
   sensitive = true
+}
+
+output "kubernetes_group" {
+  value = kubernetes_role_binding.cicd.subject[0].name
 }

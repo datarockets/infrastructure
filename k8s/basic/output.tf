@@ -18,3 +18,7 @@ output "ingress_load_balancers" {
     hostname = module.ingress[name].hostname
   }}
 }
+
+output "app_namespace" {
+  value = kubernetes_namespace.app.id
+}
