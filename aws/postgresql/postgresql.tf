@@ -31,10 +31,6 @@ variable "vpc_id" {
   type = string
 }
 
-variable "eks_private_subnets_cidr_blocks" {
-  type = list(string)
-}
-
 variable "database_subnets" {
   type = map(string)
 }
@@ -43,6 +39,10 @@ variable "eks" {
   type = object({
     cluster_name = string
   })
+}
+
+variable "allow_security_group_ids" {
+  type = list(string)
 }
 
 resource "aws_subnet" "database" {
@@ -58,26 +58,12 @@ resource "aws_subnet" "database" {
 }
 
 resource "aws_security_group" "database" {
-  name = "${var.app}-${var.environment}-eks-database"
-  description = "Allow resources from EKS private subnets to access RDS database"
+  name = "${var.app}-${var.environment}-rds-postgresql"
+  description = "PostgreSQL security group"
   vpc_id = var.vpc_id
 
-  ingress {
-    description = "Resources in EKS private subnets"
-    from_port = 5432
-    to_port = 5432
-    protocol = "tcp"
-    cidr_blocks = var.eks_private_subnets_cidr_blocks
-    self = true
-  }
-
-  egress {
-    description = "All traffic"
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -117,6 +103,54 @@ module "rds" {
       value = "utf8"
     }
   ]
+}
+
+resource "aws_security_group_rule" "db_ingress" {
+  for_each = toset(var.allow_security_group_ids)
+
+  security_group_id = aws_security_group.database.id
+  description = "Ingress to PostgreSQL"
+  type = "ingress"
+  protocol = "tcp"
+  from_port = module.rds.db_instance_port
+  to_port = module.rds.db_instance_port
+  source_security_group_id = each.value
+}
+
+resource "aws_security_group_rule" "db_egress" {
+  for_each = toset(var.allow_security_group_ids)
+
+  security_group_id = aws_security_group.database.id
+  description = "Egress from PostgreSQL"
+  type = "egress"
+  protocol = "tcp"
+  from_port = 0
+  to_port = 0
+  source_security_group_id = each.value
+}
+
+resource "aws_security_group_rule" "egress_to_db" {
+  for_each = toset(var.allow_security_group_ids)
+
+  security_group_id = each.value
+  description = "Egress to PostgreSQL"
+  type = "egress"
+  protocol = "tcp"
+  from_port = module.rds.db_instance_port
+  to_port = module.rds.db_instance_port
+  source_security_group_id = aws_security_group.database.id
+}
+
+resource "aws_security_group_rule" "ingress_from_db" {
+  for_each = toset(var.allow_security_group_ids)
+
+  security_group_id = each.value
+  description = "Ingress from PostgreSQL"
+  type = "ingress"
+  protocol = "tcp"
+  from_port = 0
+  to_port = 0
+  source_security_group_id = aws_security_group.database.id
 }
 
 resource "random_password" "database" {
@@ -201,4 +235,8 @@ output "database" {
 output "database_password" {
   value = random_password.database.result
   sensitive = true
+}
+
+output "security_group_id" {
+  value = aws_security_group.database.id
 }
