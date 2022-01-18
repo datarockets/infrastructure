@@ -68,7 +68,7 @@ module "eks" {
       disk_size = 20
 
       desired_capacity = 2
-      min_capacity = 2
+      min_capacity = 1
       max_capacity = 3
     }
   }
