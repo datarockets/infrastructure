@@ -84,6 +84,20 @@ module "eks" {
   cluster_security_group_description = "EKS cluster security group."
 }
 
+# We need it to make cert-manager to work since it makes an http request to
+# public self during the self-check while issuing a new certificate.
+resource "aws_security_group_rule" "eks_node_egress_to_http" {
+  security_group_id = module.eks.node_security_group_id
+  description = "Egress to http (port 80)"
+  type = "egress"
+  protocol = "tcp"
+  from_port = 80
+  to_port = 80
+  cidr_blocks = [
+    "0.0.0.0/0"
+  ]
+}
+
 output "vpc_id" {
   value = module.vpc.vpc_id
 }
