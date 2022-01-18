@@ -75,7 +75,7 @@ module "rds" {
 
   engine = "postgres"
   family = "postgres12"
-  engine_version = "12.6"
+  engine_version = "12.8"
   major_engine_version = "12"
   instance_class = "db.t2.micro"
   allocated_storage = 10
