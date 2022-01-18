@@ -82,18 +82,6 @@ resource "aws_security_group_rule" "redis_ingress" {
   source_security_group_id = each.value
 }
 
-resource "aws_security_group_rule" "redis_egress" {
-  for_each = toset(var.allow_security_group_ids)
-
-  security_group_id = aws_security_group.redis.id
-  description = "Egress from redis"
-  type = "egress"
-  protocol = "tcp"
-  from_port = 0
-  to_port = 0
-  source_security_group_id = each.value
-}
-
 resource "aws_security_group_rule" "egress_to_redis" {
   for_each = toset(var.allow_security_group_ids)
 
@@ -103,18 +91,6 @@ resource "aws_security_group_rule" "egress_to_redis" {
   protocol = "tcp"
   from_port = aws_elasticache_cluster.redis.cache_nodes.0.port
   to_port = aws_elasticache_cluster.redis.cache_nodes.0.port
-  source_security_group_id = aws_security_group.redis.id
-}
-
-resource "aws_security_group_rule" "ingress_from_redis" {
-  for_each = toset(var.allow_security_group_ids)
-
-  security_group_id = each.value
-  description = "Ingress from redis"
-  type = "ingress"
-  protocol = "tcp"
-  from_port = 0
-  to_port = 0
   source_security_group_id = aws_security_group.redis.id
 }
 

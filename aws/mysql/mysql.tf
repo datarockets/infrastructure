@@ -117,18 +117,6 @@ resource "aws_security_group_rule" "db_ingress" {
   source_security_group_id = each.value
 }
 
-resource "aws_security_group_rule" "db_egress" {
-  for_each = toset(var.allow_security_group_ids)
-
-  security_group_id = aws_security_group.database.id
-  description = "Egress from mysql"
-  type = "egress"
-  protocol = "tcp"
-  from_port = 0
-  to_port = 0
-  source_security_group_id = each.value
-}
-
 resource "aws_security_group_rule" "egress_to_db" {
   for_each = toset(var.allow_security_group_ids)
 
@@ -138,18 +126,6 @@ resource "aws_security_group_rule" "egress_to_db" {
   protocol = "tcp"
   from_port = module.rds.db_instance_port
   to_port = module.rds.db_instance_port
-  source_security_group_id = aws_security_group.database.id
-}
-
-resource "aws_security_group_rule" "ingress_from_db" {
-  for_each = toset(var.allow_security_group_ids)
-
-  security_group_id = each.value
-  description = "Ingress from mysql"
-  type = "ingress"
-  protocol = "tcp"
-  from_port = 0
-  to_port = 0
   source_security_group_id = aws_security_group.database.id
 }
 
