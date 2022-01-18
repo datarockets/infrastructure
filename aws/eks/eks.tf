@@ -67,9 +67,9 @@ module "eks" {
       subnets = module.vpc.private_subnets
       disk_size = 20
 
-      desired_capacity = 1
-      min_capacity = 1
-      max_capacity = 2
+      desired_capacity = 2
+      min_capacity = 2
+      max_capacity = 3
     }
   }
 
