@@ -30,7 +30,7 @@ resource "digitalocean_kubernetes_cluster" "k8s_cluster" {
 }
 
 resource "digitalocean_container_registry" "container_registry" {
-  name = var.project
+  name = var.registry
   subscription_tier_slug = var.container_registry_plan
 }
 
