@@ -1,3 +1,15 @@
+terraform {
+  backend "s3" {
+    key      = "terraform.tfstate"
+    bucket   = "first-project-test"
+    region   = "tor1"
+    endpoint = "fra1.digitaloceanspaces.com"
+    skip_region_validation      = true
+    skip_credentials_validation = true
+    skip_metadata_api_check     = true
+  }
+}
+
 module "digitalocean" {
   source = "git@github.com:datarockets/infrastructure.git//do/k8s?ref=example-digital-ocean"
 
