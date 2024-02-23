@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
       version = "~> 2.7"
     }
   }
@@ -41,8 +41,8 @@ resource "aws_iam_access_key" "cicd" {
 }
 
 resource "aws_iam_policy" "cicd" {
-  name = "continous_delivery"
-  path = "/automation/${var.app}/${var.environment}/"
+  name        = "continous_delivery"
+  path        = "/automation/${var.app}/${var.environment}/"
   description = "Allows to push images to ECR, use CodePipeline and rollout updates in EKS"
 
   policy = jsonencode({
@@ -71,14 +71,14 @@ resource "aws_iam_policy" "cicd" {
         Action = [
           "eks:DescribeCluster"
         ]
-        Effect = "Allow"
+        Effect   = "Allow"
         Resource = [var.cluster_arn]
       },
       {
         Action = [
           "ecr:GetAuthorizationToken"
         ],
-        Effect = "Allow"
+        Effect   = "Allow"
         Resource = "*"
       }
     ]
@@ -86,14 +86,14 @@ resource "aws_iam_policy" "cicd" {
 }
 
 resource "aws_iam_user_policy_attachment" "cicd" {
-  user = aws_iam_user.cicd.name
+  user       = aws_iam_user.cicd.name
   policy_arn = aws_iam_policy.cicd.arn
 }
 
 resource "kubernetes_role" "cicd" {
   metadata {
     namespace = var.kubernetes_app_namespace
-    name = "cicd"
+    name      = "cicd"
     labels = {
       app = var.app
     }
@@ -101,15 +101,15 @@ resource "kubernetes_role" "cicd" {
 
   rule {
     api_groups = ["apps"]
-    resources = ["deployments"]
-    verbs = ["get", "list", "watch", "update", "patch"]
+    resources  = ["deployments"]
+    verbs      = ["get", "list", "watch", "update", "patch"]
   }
 }
 
 resource "kubernetes_role_binding" "cicd" {
   metadata {
     namespace = var.kubernetes_app_namespace
-    name = "cicd"
+    name      = "cicd"
     labels = {
       app = var.app
     }
@@ -117,20 +117,20 @@ resource "kubernetes_role_binding" "cicd" {
 
   role_ref {
     api_group = "rbac.authorization.k8s.io"
-    kind = "Role"
-    name = kubernetes_role.cicd.metadata[0].name
+    kind      = "Role"
+    name      = kubernetes_role.cicd.metadata[0].name
   }
 
   subject {
     api_group = "rbac.authorization.k8s.io"
-    kind = "Group"
-    name = "cicd"
+    kind      = "Group"
+    name      = "cicd"
   }
 }
 
 output "iam_user" {
   value = {
-    arn = aws_iam_user.cicd.arn
+    arn  = aws_iam_user.cicd.arn
     name = aws_iam_user.cicd.name
   }
 }
@@ -140,7 +140,7 @@ output "iam_user_key_id" {
 }
 
 output "iam_user_key_secret" {
-  value = aws_iam_access_key.cicd.secret
+  value     = aws_iam_access_key.cicd.secret
   sensitive = true
 }
 

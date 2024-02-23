@@ -1,10 +1,10 @@
 variable "create_app_namespace" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "app_namespace" {
-  type = string
+  type    = string
   default = "default"
 }
 
@@ -17,33 +17,33 @@ variable "email" {
 }
 
 variable "dcr_credentials" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "services" {
   type = map(
     object({
-      deployment_labels = optional(map(string))
-      service_labels = optional(map(string))
-      pod_labels = optional(map(string))
-      service_account = optional(string)
-      replicas = number
-      image = string
+      deployment_labels                = optional(map(string))
+      service_labels                   = optional(map(string))
+      pod_labels                       = optional(map(string))
+      service_account                  = optional(string)
+      replicas                         = number
+      image                            = string
       termination_grace_period_seconds = optional(number)
-      command = optional(list(string))
-      ports = optional(list(number))
-      env_from_secrets = optional(list(string))
-      env_from_field = optional(map(string))
-      env = optional(map(string))
-      mount_secrets = optional(map(string))
+      command                          = optional(list(string))
+      ports                            = optional(list(number))
+      env_from_secrets                 = optional(list(string))
+      env_from_field                   = optional(map(string))
+      env                              = optional(map(string))
+      mount_secrets                    = optional(map(string))
       init_container = optional(object({
-        image = optional(string)
-        command = list(string)
+        image            = optional(string)
+        command          = list(string)
         env_from_secrets = optional(list(string))
-        env_from_field = optional(map(string))
-        env = optional(map(string))
-        mount_secrets = optional(map(string))
+        env_from_field   = optional(map(string))
+        env              = optional(map(string))
+        mount_secrets    = optional(map(string))
       }))
     })
   )
@@ -55,7 +55,7 @@ variable "web_services" {
 }
 
 variable "secrets" {
-  type = map(map(any))
+  type    = map(map(any))
   default = {}
 }
 
@@ -67,9 +67,9 @@ variable "ingresses" {
       rules = list(object({
         host = string
         paths = list(object({
-          path = string
+          path    = string
           service = optional(string)
-          port = optional(number)
+          port    = optional(number)
         }))
       }))
     })
@@ -79,7 +79,7 @@ variable "ingresses" {
 
 variable "nginx_ingress_helm_chart_options" {
   type = list(object({
-    name = string
+    name  = string
     value = string
   }))
 

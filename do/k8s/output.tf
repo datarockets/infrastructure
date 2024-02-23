@@ -1,10 +1,10 @@
 output "k8s_host" {
-  value = digitalocean_kubernetes_cluster.k8s_cluster.endpoint
+  value       = digitalocean_kubernetes_cluster.k8s_cluster.endpoint
   description = "Kubernetes management API host"
 }
 
 output "k8s_token" {
-  value = digitalocean_kubernetes_cluster.k8s_cluster.kube_config[0].token
+  value     = digitalocean_kubernetes_cluster.k8s_cluster.kube_config[0].token
   sensitive = true
 }
 
@@ -28,7 +28,7 @@ output "db_user" {
 }
 
 output "db_password" {
-  value = digitalocean_database_user.db_user.password
+  value     = digitalocean_database_user.db_user.password
   sensitive = true
 }
 
@@ -45,11 +45,11 @@ output "dcr_endpoint" {
 }
 
 output "dcr_credentials_k8s" {
-  value = digitalocean_container_registry_docker_credentials.dcr_credentials_k8s.docker_credentials
+  value     = digitalocean_container_registry_docker_credentials.dcr_credentials_k8s.docker_credentials
   sensitive = true
 }
 
 output "dcr_credentials_cicd" {
-  value = digitalocean_container_registry_docker_credentials.dcr_credentials_cicd.docker_credentials
+  value     = digitalocean_container_registry_docker_credentials.dcr_credentials_cicd.docker_credentials
   sensitive = true
 }

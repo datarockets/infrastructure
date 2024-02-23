@@ -1,15 +1,15 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 3.0"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
       version = "~> 3.1"
     }
     null = {
-      source = "hashicorp/null"
+      source  = "hashicorp/null"
       version = "~> 3.1"
     }
   }
@@ -48,8 +48,8 @@ variable "allow_security_group_ids" {
 resource "aws_subnet" "database" {
   for_each = var.database_subnets
 
-  vpc_id = var.vpc_id
-  cidr_block = each.key
+  vpc_id            = var.vpc_id
+  cidr_block        = each.key
   availability_zone = each.value
 
   tags = {
@@ -58,9 +58,9 @@ resource "aws_subnet" "database" {
 }
 
 resource "aws_security_group" "database" {
-  name = "${var.app}-${var.environment}-rds-postgresql"
+  name        = "${var.app}-${var.environment}-rds-postgresql"
   description = "PostgreSQL security group"
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
 
   lifecycle {
     create_before_destroy = true
@@ -73,23 +73,23 @@ module "rds" {
 
   identifier = "${var.app}-${var.environment}"
 
-  engine = "postgres"
-  family = "postgres12"
-  engine_version = "12.8"
+  engine               = "postgres"
+  family               = "postgres12"
+  engine_version       = "12.8"
   major_engine_version = "12"
-  instance_class = "db.t2.micro"
-  allocated_storage = 10
+  instance_class       = "db.t2.micro"
+  allocated_storage    = 10
 
-  backup_window = "03:00-06:00"
+  backup_window           = "03:00-06:00"
   backup_retention_period = 15
-  maintenance_window = "Mon:00:00-Mon:03:00"
+  maintenance_window      = "Mon:00:00-Mon:03:00"
 
-  name = "main"
-  username = "root"
+  name                   = "main"
+  username               = "root"
   create_random_password = true
-  port = 5432
+  port                   = 5432
 
-  subnet_ids = [for subnet in aws_subnet.database: subnet.id]
+  subnet_ids = [for subnet in aws_subnet.database : subnet.id]
 
   vpc_security_group_ids = [aws_security_group.database.id]
 
@@ -108,29 +108,29 @@ module "rds" {
 resource "aws_security_group_rule" "db_ingress" {
   for_each = toset(var.allow_security_group_ids)
 
-  security_group_id = aws_security_group.database.id
-  description = "Ingress to PostgreSQL"
-  type = "ingress"
-  protocol = "tcp"
-  from_port = module.rds.db_instance_port
-  to_port = module.rds.db_instance_port
+  security_group_id        = aws_security_group.database.id
+  description              = "Ingress to PostgreSQL"
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = module.rds.db_instance_port
+  to_port                  = module.rds.db_instance_port
   source_security_group_id = each.value
 }
 
 resource "aws_security_group_rule" "egress_to_db" {
   for_each = toset(var.allow_security_group_ids)
 
-  security_group_id = each.value
-  description = "Egress to PostgreSQL"
-  type = "egress"
-  protocol = "tcp"
-  from_port = module.rds.db_instance_port
-  to_port = module.rds.db_instance_port
+  security_group_id        = each.value
+  description              = "Egress to PostgreSQL"
+  type                     = "egress"
+  protocol                 = "tcp"
+  from_port                = module.rds.db_instance_port
+  to_port                  = module.rds.db_instance_port
   source_security_group_id = aws_security_group.database.id
 }
 
 resource "random_password" "database" {
-  length = 20
+  length  = 20
   special = true
 }
 
@@ -201,15 +201,15 @@ resource "null_resource" "database" {
 
 output "database" {
   value = {
-    host = module.rds.db_instance_address
-    port = module.rds.db_instance_port
+    host     = module.rds.db_instance_address
+    port     = module.rds.db_instance_port
     username = var.app
     database = var.app
   }
 }
 
 output "database_password" {
-  value = random_password.database.result
+  value     = random_password.database.result
   sensitive = true
 }
 

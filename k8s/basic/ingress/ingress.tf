@@ -4,11 +4,11 @@ terraform {
 
 resource "kubernetes_ingress" "ingress" {
   metadata {
-    name = var.name
+    name      = var.name
     namespace = var.app_namespace
     annotations = merge(
       var.ingress.disable_tls == true ? {} : {
-        "cert-manager.io/issuer" = "letsencrypt"
+        "cert-manager.io/issuer"                    = "letsencrypt"
         "acme.cert-manager.io/http01-edit-in-place" = "true"
       },
       var.ingress.annotations
@@ -24,7 +24,7 @@ resource "kubernetes_ingress" "ingress" {
       for_each = var.ingress.disable_tls == true ? [] : toset(["enable"])
 
       content {
-        hosts = var.ingress.rules[*].host
+        hosts       = var.ingress.rules[*].host
         secret_name = "letsencrypt-tls-${var.name}"
       }
     }

@@ -6,7 +6,7 @@ resource "kubernetes_secret" "secret" {
   for_each = var.secrets
 
   metadata {
-    name = each.key
+    name      = each.key
     namespace = var.app_namespace
   }
 
@@ -17,7 +17,7 @@ resource "kubernetes_secret" "docker-config" {
   for_each = var.dcr_credentials != "" ? { default = var.dcr_credentials } : {}
 
   metadata {
-    name = "docker-config"
+    name      = "docker-config"
     namespace = var.app_namespace
   }
 
@@ -28,7 +28,7 @@ resource "kubernetes_secret" "docker-config" {
 }
 
 locals {
-  service_account_names_from_services = [for name, service in var.services: service.service_account]
+  service_account_names_from_services = [for name, service in var.services : service.service_account]
   service_account_names = compact(
     distinct(
       concat(
@@ -44,9 +44,9 @@ resource "kubernetes_service_account" "service_account" {
 
   metadata {
     namespace = var.app_namespace
-    name = each.value
+    name      = each.value
     annotations = lookup(
-      lookup(var.service_accounts, each.value, {annotations = {}}),
+      lookup(var.service_accounts, each.value, { annotations = {} }),
       "annotations",
       null
     )
@@ -60,7 +60,7 @@ resource "kubernetes_deployment" "deployment" {
     name = each.key
     labels = merge(
       {
-        app = var.app
+        app     = var.app
         service = each.key
       },
       each.value.deployment_labels != null ? each.value.deployment_labels : {}
@@ -79,7 +79,7 @@ resource "kubernetes_deployment" "deployment" {
       metadata {
         labels = merge(
           {
-            app = var.app
+            app     = var.app
             service = each.key
           },
           each.value.pod_labels != null ? each.value.pod_labels : {}
@@ -87,7 +87,7 @@ resource "kubernetes_deployment" "deployment" {
         namespace = var.app_namespace
       }
       spec {
-        service_account_name = each.value.service_account != null ? kubernetes_service_account.service_account[each.value.service_account].metadata[0].name : "default"
+        service_account_name             = each.value.service_account != null ? kubernetes_service_account.service_account[each.value.service_account].metadata[0].name : "default"
         termination_grace_period_seconds = each.value.termination_grace_period_seconds
         dynamic "image_pull_secrets" {
           for_each = var.dcr_credentials != "" ? { default = var.dcr_credentials } : {}
@@ -97,8 +97,8 @@ resource "kubernetes_deployment" "deployment" {
         }
 
         container {
-          name = each.key
-          image = each.value.image
+          name    = each.key
+          image   = each.value.image
           command = each.value.command
 
           dynamic "port" {
@@ -112,7 +112,7 @@ resource "kubernetes_deployment" "deployment" {
             for_each = each.value.env_from_secrets != null ? each.value.env_from_secrets : []
             content {
               secret_ref {
-                name = kubernetes_secret.secret[env_from.value].metadata[0].name
+                name     = kubernetes_secret.secret[env_from.value].metadata[0].name
                 optional = false
               }
             }
@@ -121,7 +121,7 @@ resource "kubernetes_deployment" "deployment" {
           dynamic "env" {
             for_each = each.value.env != null ? each.value.env : {}
             content {
-              name = env.key
+              name  = env.key
               value = env.value
             }
           }
@@ -141,7 +141,7 @@ resource "kubernetes_deployment" "deployment" {
           dynamic "volume_mount" {
             for_each = each.value.mount_secrets != null ? each.value.mount_secrets : {}
             content {
-              name = volume_mount.key
+              name       = volume_mount.key
               mount_path = volume_mount.value
             }
           }
@@ -151,15 +151,15 @@ resource "kubernetes_deployment" "deployment" {
           for_each = each.value.init_container != null ? [each.value.init_container] : []
 
           content {
-            name = "${each.key}-init-container"
-            image = init_container.value.image != null ? init_container.value.image : each.value.image
+            name    = "${each.key}-init-container"
+            image   = init_container.value.image != null ? init_container.value.image : each.value.image
             command = init_container.value.command
 
             dynamic "env_from" {
               for_each = init_container.value.env_from_secrets != null ? init_container.value.env_from_secrets : []
               content {
                 secret_ref {
-                  name = kubernetes_secret.secret[env_from.value].metadata[0].name
+                  name     = kubernetes_secret.secret[env_from.value].metadata[0].name
                   optional = false
                 }
               }
@@ -168,7 +168,7 @@ resource "kubernetes_deployment" "deployment" {
             dynamic "env" {
               for_each = init_container.value.env != null ? init_container.value.env : {}
               content {
-                name = env.key
+                name  = env.key
                 value = env.value
               }
             }
@@ -188,7 +188,7 @@ resource "kubernetes_deployment" "deployment" {
             dynamic "volume_mount" {
               for_each = init_container.value.mount_secrets != null ? each.value.mount_secrets : {}
               content {
-                name = volume_mount.key
+                name       = volume_mount.key
                 mount_path = volume_mount.value
               }
             }
@@ -217,7 +217,7 @@ resource "kubernetes_service" "service" {
     name = each.key
     labels = merge(
       {
-        app = var.app
+        app     = var.app
         service = each.key
       },
       var.services[each.key].service_labels != null ? var.services[each.key].service_labels : {}
@@ -225,13 +225,13 @@ resource "kubernetes_service" "service" {
     namespace = var.app_namespace
   }
   spec {
-    type = "ClusterIP"
+    type     = "ClusterIP"
     selector = kubernetes_deployment.deployment[each.key].metadata[0].labels
 
     dynamic "port" {
       for_each = var.services[each.key].ports
       content {
-        port = port.value
+        port        = port.value
         target_port = port.value
       }
     }

@@ -7,7 +7,7 @@ variable "environment" {
 }
 
 variable "repositories" {
-  type = set(string)
+  type    = set(string)
   default = []
 }
 
@@ -26,12 +26,12 @@ resource "aws_ecr_lifecycle_policy" "keep_last_10" {
     rules = [
       {
         rulePriority = 1
-        description = "Keep last 10 tagged images"
+        description  = "Keep last 10 tagged images"
         selection = {
-          tagStatus = "tagged"
+          tagStatus     = "tagged"
           tagPrefixList = ["v"]
-          countType = "imageCountMoreThan"
-          countNumber = 10
+          countType     = "imageCountMoreThan"
+          countNumber   = 10
         }
         action = {
           type = "expire"
@@ -39,11 +39,11 @@ resource "aws_ecr_lifecycle_policy" "keep_last_10" {
       },
       {
         rulePriority = 2
-        description = "Expire images older than 14 days"
+        description  = "Expire images older than 14 days"
         selection = {
-          tagStatus = "untagged"
-          countType = "sinceImagePushed"
-          countUnit = "days"
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
           countNumber = 14
         }
         action = {
@@ -55,13 +55,13 @@ resource "aws_ecr_lifecycle_policy" "keep_last_10" {
 }
 
 output "repository_urls" {
-  value = {for name in var.repositories:
+  value = { for name in var.repositories :
     name => aws_ecr_repository.repository[name].repository_url
   }
 }
 
 output "repository_arns" {
-  value = [for name in var.repositories:
+  value = [for name in var.repositories :
     aws_ecr_repository.repository[name].arn
   ]
 }

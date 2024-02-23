@@ -1,12 +1,12 @@
 terraform {
   required_providers {
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
       version = "~> 2.7.1"
     }
 
     helm = {
-      source = "hashicorp/helm"
+      source  = "hashicorp/helm"
       version = "~> 2.4.1"
     }
   }
@@ -14,7 +14,7 @@ terraform {
 }
 
 module "dependencies" {
-  source = "./dependencies"
+  source                           = "./dependencies"
   nginx_ingress_helm_chart_options = var.nginx_ingress_helm_chart_options
 }
 
@@ -33,13 +33,13 @@ module "cluster" {
 
   app_namespace = kubernetes_namespace.app.id
 
-  app = var.app
-  email = var.email
-  dcr_credentials = var.dcr_credentials
+  app              = var.app
+  email            = var.email
+  dcr_credentials  = var.dcr_credentials
   service_accounts = var.service_accounts
-  services = var.services
-  web_services = var.web_services
-  secrets = var.secrets
+  services         = var.services
+  web_services     = var.web_services
+  secrets          = var.secrets
 }
 
 module "ingress" {
@@ -53,7 +53,7 @@ module "ingress" {
 
   app_namespace = kubernetes_namespace.app.id
 
-  app = var.app
-  name = each.key
+  app     = var.app
+  name    = each.key
   ingress = each.value
 }
