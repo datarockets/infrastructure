@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 5.38"
     }
   }
 }
@@ -35,7 +35,7 @@ variable "legacy_iam_role_name" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "3.11.3"
+  version = "5.5.2"
 
   name = "${var.app}-${var.environment}"
   cidr = var.vpc_cidr
@@ -49,13 +49,14 @@ module "vpc" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.2.0"
+  version = "20.4.0"
 
   cluster_name    = "${var.app}-${var.environment}"
   cluster_version = var.cluster_version
 
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = concat(module.vpc.private_subnets, module.vpc.public_subnets)
+  vpc_id                                       = module.vpc.vpc_id
+  subnet_ids                                   = concat(module.vpc.private_subnets, module.vpc.public_subnets)
+  node_security_group_enable_recommended_rules = false
 
   cluster_enabled_log_types              = ["authenticator", "controllerManager", "scheduler"]
   cloudwatch_log_group_retention_in_days = 7
@@ -102,8 +103,8 @@ output "vpc_id" {
   value = module.vpc.vpc_id
 }
 
-output "cluster_id" {
-  value = module.eks.cluster_id
+output "cluster_name" {
+  value = module.eks.cluster_name
 }
 
 output "cluster_arn" {
@@ -120,10 +121,6 @@ output "public_cidr_blocks" {
 
 output "node_security_group_id" {
   value = module.eks.node_security_group_id
-}
-
-output "aws_auth_configmap_yaml" {
-  value = module.eks.aws_auth_configmap_yaml
 }
 
 output "eks_managed_node_group_default_iam_role_arn" {
