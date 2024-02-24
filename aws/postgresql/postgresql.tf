@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 5.38"
     }
     random = {
       source  = "hashicorp/random"
@@ -69,7 +69,7 @@ resource "aws_security_group" "database" {
 
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
-  version = "3.5.0"
+  version = "6.4.0"
 
   identifier = "${var.app}-${var.environment}"
 
@@ -79,6 +79,7 @@ module "rds" {
   major_engine_version = "12"
   instance_class       = "db.t2.micro"
   allocated_storage    = 10
+  storage_encrypted    = false
 
   backup_window           = "03:00-06:00"
   backup_retention_period = 15
