@@ -1,7 +1,3 @@
-terraform {
-  experiments = [module_variable_optional_attrs]
-}
-
 resource "kubernetes_ingress" "ingress" {
   metadata {
     name      = var.name
