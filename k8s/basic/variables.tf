@@ -1,13 +1,3 @@
-variable "create_app_namespace" {
-  type    = bool
-  default = true
-}
-
-variable "app_namespace" {
-  type    = string
-  default = "default"
-}
-
 variable "app" {
   type = string
 }

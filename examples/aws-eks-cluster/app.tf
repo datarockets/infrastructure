@@ -109,9 +109,6 @@ module "kubernetes" {
 
   depends_on = [module.eks]
 
-  create_app_namespace = false
-  app_namespace        = module.eks.app_namespace
-
   app   = var.app
   email = var.email
 
