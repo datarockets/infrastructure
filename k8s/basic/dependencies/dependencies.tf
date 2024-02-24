@@ -29,7 +29,7 @@ resource "helm_release" "cert-manager" {
 resource "helm_release" "nginx-ingress" {
   name       = "nginx-ingress"
   chart      = "nginx-ingress"
-  version    = "0.12.0"
+  version    = "1.1.3"
   repository = "https://helm.nginx.com/stable"
   namespace  = "kube-system"
 
