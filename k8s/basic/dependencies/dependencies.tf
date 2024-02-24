@@ -1,6 +1,6 @@
 variable "nginx_ingress_helm_chart_options" {
   type = list(object({
-    name = string
+    name  = string
     value = string
   }))
 
@@ -34,15 +34,15 @@ resource "helm_release" "nginx-ingress" {
   namespace  = "kube-system"
 
   set {
-    name = "controller.enableSnippets"
+    name  = "controller.enableSnippets"
     value = true
   }
 
   dynamic "set" {
-    for_each = {for i, param in var.nginx_ingress_helm_chart_options: tostring(i) => param}
+    for_each = { for i, param in var.nginx_ingress_helm_chart_options : tostring(i) => param }
 
     content {
-      name = set.value.name
+      name  = set.value.name
       value = set.value.value
     }
   }

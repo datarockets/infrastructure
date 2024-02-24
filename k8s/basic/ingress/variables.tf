@@ -17,9 +17,9 @@ variable "ingress" {
     rules = list(object({
       host = string
       paths = list(object({
-        path = string
+        path    = string
         service = optional(string)
-        port = optional(number)
+        port    = optional(number)
       }))
     }))
   })

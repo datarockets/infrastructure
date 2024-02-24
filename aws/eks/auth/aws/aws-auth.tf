@@ -17,9 +17,9 @@ variable "node_group_iam_role_arn" {
 variable "users" {
   type = list(
     object({
-      userarn = string
+      userarn  = string
       username = string
-      groups = list(string)
+      groups   = list(string)
     })
   )
 }
@@ -34,9 +34,9 @@ locals {
   masters_aws_users = flatten([for group in data.aws_iam_group.masters_groups :
     [for user in group.users :
       {
-        userarn = user.arn
+        userarn  = user.arn
         username = user.user_name
-        groups = ["system:masters"]
+        groups   = ["system:masters"]
       }
     ]
   ])
@@ -44,7 +44,7 @@ locals {
 
 resource "kubernetes_config_map" "aws_auth" {
   metadata {
-    name = "aws-auth"
+    name      = "aws-auth"
     namespace = "kube-system"
   }
 
@@ -52,7 +52,7 @@ resource "kubernetes_config_map" "aws_auth" {
     mapAccounts = jsonencode([])
     mapRoles = yamlencode([
       {
-        rolearn = var.node_group_iam_role_arn
+        rolearn  = var.node_group_iam_role_arn
         username = "system:node:{{EC2PrivateDNSName}}"
         groups = [
           "system:bootstrappers",

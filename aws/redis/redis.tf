@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "~> 3.0"
     }
   }
@@ -32,17 +32,17 @@ resource "aws_subnet" "redis" {
 
   vpc_id = var.vpc_id
 
-  cidr_block = each.key
+  cidr_block        = each.key
   availability_zone = each.value
 }
 
 resource "aws_elasticache_subnet_group" "redis" {
-  name = "${var.app}-${var.environment}-redis-subnet-group"
-  subnet_ids = [for subnet in aws_subnet.redis: subnet.id]
+  name       = "${var.app}-${var.environment}-redis-subnet-group"
+  subnet_ids = [for subnet in aws_subnet.redis : subnet.id]
 }
 
 resource "aws_security_group" "redis" {
-  name = "${var.app}-${var.environment}-elasticache-redis"
+  name        = "${var.app}-${var.environment}-elasticache-redis"
   description = "Redis security group"
 
   vpc_id = var.vpc_id
@@ -55,11 +55,11 @@ resource "aws_security_group" "redis" {
 resource "aws_elasticache_cluster" "redis" {
   cluster_id = "${var.app}-${var.environment}-redis"
 
-  engine = "redis"
-  engine_version = "6.x"
+  engine               = "redis"
+  engine_version       = "6.x"
   parameter_group_name = "default.redis6.x"
 
-  node_type = "cache.t3.micro"
+  node_type       = "cache.t3.micro"
   num_cache_nodes = 1
 
   port = 6379
@@ -67,30 +67,30 @@ resource "aws_elasticache_cluster" "redis" {
   snapshot_retention_limit = 3
 
   security_group_ids = [aws_security_group.redis.id]
-  subnet_group_name = aws_elasticache_subnet_group.redis.name
+  subnet_group_name  = aws_elasticache_subnet_group.redis.name
 }
 
 resource "aws_security_group_rule" "redis_ingress" {
   for_each = toset(var.allow_security_group_ids)
 
-  security_group_id = aws_security_group.redis.id
-  description = "Ingress to redis"
-  type = "ingress"
-  protocol = "tcp"
-  from_port = aws_elasticache_cluster.redis.cache_nodes.0.port
-  to_port = aws_elasticache_cluster.redis.cache_nodes.0.port
+  security_group_id        = aws_security_group.redis.id
+  description              = "Ingress to redis"
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = aws_elasticache_cluster.redis.cache_nodes.0.port
+  to_port                  = aws_elasticache_cluster.redis.cache_nodes.0.port
   source_security_group_id = each.value
 }
 
 resource "aws_security_group_rule" "egress_to_redis" {
   for_each = toset(var.allow_security_group_ids)
 
-  security_group_id = each.value
-  description = "Egress to redis"
-  type = "egress"
-  protocol = "tcp"
-  from_port = aws_elasticache_cluster.redis.cache_nodes.0.port
-  to_port = aws_elasticache_cluster.redis.cache_nodes.0.port
+  security_group_id        = each.value
+  description              = "Egress to redis"
+  type                     = "egress"
+  protocol                 = "tcp"
+  from_port                = aws_elasticache_cluster.redis.cache_nodes.0.port
+  to_port                  = aws_elasticache_cluster.redis.cache_nodes.0.port
   source_security_group_id = aws_security_group.redis.id
 }
 

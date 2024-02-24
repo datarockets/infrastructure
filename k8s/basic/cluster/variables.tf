@@ -11,33 +11,33 @@ variable "email" {
 }
 
 variable "dcr_credentials" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "services" {
   type = map(
     object({
-      deployment_labels = optional(map(string))
-      service_labels = optional(map(string))
-      pod_labels = optional(map(string))
-      service_account = optional(string)
-      replicas = number
-      image = string
+      deployment_labels                = optional(map(string))
+      service_labels                   = optional(map(string))
+      pod_labels                       = optional(map(string))
+      service_account                  = optional(string)
+      replicas                         = number
+      image                            = string
       termination_grace_period_seconds = optional(number)
-      command = optional(list(string))
-      ports = optional(list(number))
-      env_from_secrets = optional(list(string))
-      env_from_field = optional(map(string))
-      env = optional(map(string))
-      mount_secrets = optional(map(string))
+      command                          = optional(list(string))
+      ports                            = optional(list(number))
+      env_from_secrets                 = optional(list(string))
+      env_from_field                   = optional(map(string))
+      env                              = optional(map(string))
+      mount_secrets                    = optional(map(string))
       init_container = optional(object({
-        image = optional(string)
-        command = list(string)
+        image            = optional(string)
+        command          = list(string)
         env_from_secrets = optional(list(string))
-        env_from_field = optional(map(string))
-        env = optional(map(string))
-        mount_secrets = optional(map(string))
+        env_from_field   = optional(map(string))
+        env              = optional(map(string))
+        mount_secrets    = optional(map(string))
       }))
     })
   )
