@@ -16,12 +16,16 @@ resource "kubernetes_namespace" "cert-manager" {
 resource "helm_release" "cert-manager" {
   name       = "cert-manager"
   chart      = "cert-manager"
-  version    = "1.6.1"
+  version    = "1.16.1"
   repository = "https://charts.jetstack.io"
   namespace  = kubernetes_namespace.cert-manager.id
 
   set {
-    name  = "installCRDs"
+    name  = "crds.enabled"
+    value = "true"
+  }
+  set {
+    name = "crds.keep"
     value = "true"
   }
 }
@@ -29,7 +33,7 @@ resource "helm_release" "cert-manager" {
 resource "helm_release" "nginx-ingress" {
   name       = "nginx-ingress"
   chart      = "nginx-ingress"
-  version    = "0.12.0"
+  version    = "1.4.0"
   repository = "https://helm.nginx.com/stable"
   namespace  = "kube-system"
 
