@@ -35,7 +35,7 @@ variable "legacy_iam_role_name" {
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
-  version = "3.11.3"
+  version = "5.14.0"
 
   name = "${var.app}-${var.environment}"
   cidr = var.vpc_cidr
@@ -49,7 +49,7 @@ module "vpc" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.2.0"
+  version = "20.26.1"
 
   cluster_name = "${var.app}-${var.environment}"
   cluster_version = var.cluster_version

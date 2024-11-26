@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 5.62"
     }
     random = {
       source = "hashicorp/random"
@@ -69,7 +69,7 @@ resource "aws_security_group" "database" {
 
 module "rds" {
   source  = "terraform-aws-modules/rds/aws"
-  version = "3.5.0"
+  version = "6.10.0"
 
   identifier = "${var.app}-${var.environment}"
 
@@ -84,9 +84,9 @@ module "rds" {
   backup_retention_period = 15
   maintenance_window = "Mon:00:00-Mon:03:00"
 
-  name = "main"
+  db_name = "main"
   username = "root"
-  create_random_password = true
+  manage_master_user_password = true
   port = 5432
 
   subnet_ids = [for subnet in aws_subnet.database: subnet.id]
