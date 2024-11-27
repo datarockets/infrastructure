@@ -77,7 +77,7 @@ provider "helm" {
 module "eks" {
   source = "https://github.com/datarockets/infrastructure.git//aws/eks?ref=v0.2.0"
 
-  cluster_version = "1.20"
+  cluster_version = "1.21"
 
   app         = var.app
   environment = var.environment
