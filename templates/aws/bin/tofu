@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -e -o pipefail
+cd "$(dirname "$0")/.."
+
+repo_root() {
+	(
+		while [[ ! -d ".git" ]]; do
+			cd ..
+		done
+		echo $(pwd)
+	)
+}
+
+source $(repo_root)/bin/lib/utils/source_env_recursively
+source $(repo_root)/bin/lib/aws/is_aws_profile_valid
+source $(repo_root)/bin/lib/aws/_get_user_name
+source $(repo_root)/bin/lib/aws/_update_mfa_session
+
+source_env_recursively
+
+if [[ -n "${BOOTSTRAPPED}" ]]; then
+	# This is hack, in ideal world we wouldn't need any session profile,
+	# aws cli and sdk are able to work with MFA devices properly: when a temporary
+	# session get expired aws cli just asks for TOTP (MFA code) and continue well.
+	#
+	# However, Terraform doesn't support asking TOTP from users so we have a separate
+	# "session" profile where we request session creds manually before running terraform.
+	# https://github.com/hashicorp/terraform-provider-aws/issues/10491
+	if ! is_aws_profile_valid ${AWS_SESSION_PROFILE}; then
+		aws_update_mfa_session ${AWS_USER_PROFILE} ${AWS_SESSION_PROFILE}
+	fi
+
+	export AWS_PROFILE=${AWS_SESSION_PROFILE}
+	export AWS_REGION
+else
+	export AWS_PROFILE=${AWS_USER_PROFILE}
+	export AWS_REGION
+fi
+
+# export all TF_* env vars
+for terraform_variable in ${!TF_*}; do
+	export $terraform_variable
+done
+
+# We allow to assume admin role only when session name is set to user name.
+# This helps with audit later. We don't want to hardcode user name in .env files
+# so we use aws cli to get it.
+export TF_VAR_aws_user_name=$(aws_get_user_name $AWS_USER_PROFILE)
+
+tofu $@
