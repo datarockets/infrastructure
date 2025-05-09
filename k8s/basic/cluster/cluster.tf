@@ -1,7 +1,3 @@
-terraform {
-  experiments = [module_variable_optional_attrs]
-}
-
 resource "kubernetes_secret" "secret" {
   for_each = var.secrets
 
