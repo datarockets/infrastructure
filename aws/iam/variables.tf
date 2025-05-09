@@ -1,9 +1,9 @@
 variable "users" {
   type = map(
     object({
-      username = optional(string)
-      path     = optional(string, "/")
-      tags     = optional(map(string), {})
+      name = optional(string)
+      path = optional(string, "/")
+      tags = optional(map(string), {})
     })
   )
   default = {}
@@ -15,6 +15,7 @@ variable "roles" {
       name = optional(string)
       path = optional(string, "/")
       assumers = object({
+        current_users = optional(list(string), [])
         iam_users = optional(list(object({
           arn = string
         })), [])

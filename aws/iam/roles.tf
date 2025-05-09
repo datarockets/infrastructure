@@ -26,6 +26,35 @@ data "aws_iam_policy_document" "assume_role_policy" {
       }
     }
   }
+
+  dynamic "statement" {
+    for_each = toset(each.value.assumers.current_users)
+
+    content {
+      actions = [
+        "sts:AssumeRole",
+      ]
+
+      principals {
+        type = "AWS"
+        identifiers = [
+          aws_iam_user.this[statement.value].arn,
+        ]
+      }
+
+      condition {
+        test     = "Bool"
+        variable = "aws:MultiFactorAuthPresent"
+        values   = ["true"]
+      }
+
+      condition {
+        test     = "StringLike"
+        variable = "sts:RoleSessionName"
+        values   = ["$${aws:username}"]
+      }
+    }
+  }
 }
 
 locals {
