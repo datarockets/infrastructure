@@ -20,7 +20,7 @@ Provided modules should have sensible defaults and be easy to start with.
 Modules should setup secure infrastructure by default.
 
 Examples for AWS:
-* Setup and asuume roles with least privileges to do different actions. Never attach AdministratorAccess policy to user directly and don't attach it to roles assumed by terraform to change infrastructure.
+* Setup and asuume roles with least privileges to do different actions. Never attach AdministratorAccess policy to user directly. Make it easy to audit user actions.
 * Use demilitarized zone for services, don't expose them to the internet directly.
 * Access AWS services and e.g. database over private network, not over public internet.
 
