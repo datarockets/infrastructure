@@ -6,6 +6,10 @@ variable "region" {
   type = string
 }
 
+variable "registry" {
+  type = string
+}
+
 variable "k8s" {
   type = object({
     node_size  = string

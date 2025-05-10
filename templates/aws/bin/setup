@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -e -o pipefail
+cd "$(dirname "$0")/.."
+
+source ../bin/lib/core
+source ../bin/lib/aws/_setup_profile
+source ../bin/lib/aws/_setup_role_profile
+source ../bin/lib/dotenv/_replace_var
+source ../bin/lib/terraform/_process_bootstrap_blocks
+source ../bin/lib/utils/cd_or_error
+source ../bin/lib/utils/ensure_apps_installed
+source ../bin/lib/utils/source_env_recursively
+
+print_help() {
+	cat <<-EOH
+	bin/setup [--help|-h] <config>
+
+	Setup infrastructure repository. Bootstraps configuration first if not boostrapped.
+	Bootstrapping creates necessary resources such as S3 bucket for state or admin role
+	that will be used later in config.
+
+	Arguments:
+	  config -- Direcotry of the config file to be setup. By default it is the current
+	            directory. You usually start with single config but when it gets bigger
+	            it is recommended to split it into multiple ones. In example:
+	              ./
+	                critical/
+	                applications/
+	                  one-app/
+	                  another-app/
+	EOH
+}
+
+
+while [[ $# -gt 0 ]]; do
+	case $1 in
+		--help|-h)
+			print_help
+			shift
+			exit 0
+			;;
+		--*)
+			echo_error "Unknown option $1. Use --help to see available options."
+			exit 1
+			;;
+		*)
+			positional_args+=("$1")
+			shift
+			;;
+	esac
+done
+set -- "${positional_args[@]}"
+CONFIG=${1}
+
+ensure_apps_installed awk aws kubectl tofu
+
+cd_or_error ${CONFIG:-.} "Config directory ${CONFIG} does not exist"
+source_env_recursively
+
+aws_setup_profile ${AWS_REGION} ${AWS_USER_PROFILE}
+bin/tofu init
+
+if [[ -z "${BOOTSTRAPPED}" ]]; then
+	echo_debug "Bootstrapping configuration in $(pwd)"
+	bin/tofu apply \
+		-target module.terraform_backend \
+		-target module.iam
+
+	dotenv_replace_var .env AWS_ADMIN_ROLE "$(bin/tofu output -raw aws_role_arn)"
+	find . -name "*.tf" -o -name "*.tofu" | while read -r file; do
+		terraform_process_bootstrap_blocks ${file}
+	done
+
+	bin/tofu init -migrate-state -force-copy
+	bin/tofu apply \
+		-target module.terraform_backend \
+		-target module.iam
+	echo -e '\nBOOTSTRAPPED=true' >> .env
+	source_env_recursively
+fi
+
+aws_setup_role_profile \
+	${AWS_REGION} \
+	${AWS_ADMIN_ROLE_PROFILE} \
+	${AWS_USER_PROFILE} \
+	${AWS_ADMIN_ROLE}
