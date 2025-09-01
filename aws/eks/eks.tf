@@ -86,6 +86,9 @@ module "eks" {
 
 # We need it to make cert-manager to work since it makes an http request to
 # public self during the self-check while issuing a new certificate.
+# Ignored rule: Security group rule allows unrestricted egress to any IP address
+# is ignored for cert-manager since it makes an request to public server
+#trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "eks_node_egress_to_http" {
   security_group_id = module.eks.node_security_group_id
   description = "Egress to http (port 80)"

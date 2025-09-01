@@ -16,11 +16,12 @@ resource "digitalocean_vpc" "vpc" {
 
 data "digitalocean_kubernetes_versions" "k8s_versions" {}
 resource "digitalocean_kubernetes_cluster" "k8s_cluster" {
-  name         = var.project
-  region       = var.region
-  auto_upgrade = true
-  version      = data.digitalocean_kubernetes_versions.k8s_versions.latest_version
-  vpc_uuid     = digitalocean_vpc.vpc.id
+  name          = var.project
+  region        = var.region
+  auto_upgrade  = true
+  surge_upgrade = true
+  version       = data.digitalocean_kubernetes_versions.k8s_versions.latest_version
+  vpc_uuid      = digitalocean_vpc.vpc.id
 
   node_pool {
     name       = "default-pool"

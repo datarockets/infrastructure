@@ -27,6 +27,9 @@ variable "ecr_repository_arns" {
   type = list(string)
 }
 
+# Ignored rule: One or more policies are attached directly to a user
+# is ignored since it shouldn't be critical in cicd
+#trivy:ignore:AVD-AWS-0143
 resource "aws_iam_user" "cicd" {
   name = "cicd"
   path = "/automation/${var.app}/${var.environment}/"
