@@ -3,7 +3,7 @@
 terraform {
   required_providers {
     digitalocean = {
-      source = "digitalocean/digitalocean"
+      source  = "digitalocean/digitalocean"
       version = "~> 2.29.0"
     }
   }
@@ -26,11 +26,14 @@ resource "digitalocean_kubernetes_cluster" "k8s_cluster" {
     name       = "default-pool"
     size       = var.k8s.node_size
     node_count = var.k8s.node_count
+    auto_scale = var.k8s.min_nodes != null && var.k8s.max_nodes != null
+    min_nodes  = var.k8s.min_nodes
+    max_nodes  = var.k8s.max_nodes
   }
 }
 
 resource "digitalocean_container_registry" "container_registry" {
-  name = var.registry
+  name                   = var.registry
   subscription_tier_slug = var.container_registry_plan
 }
 
