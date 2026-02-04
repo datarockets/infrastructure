@@ -8,6 +8,7 @@ resource "kubernetes_service_v1" "this" {
     name      = each.key
     namespace = var.namespace
 
+    annotations = each.value.service.annotations
     labels = merge(
       {
         stack     = var.name

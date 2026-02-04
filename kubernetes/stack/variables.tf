@@ -34,8 +34,9 @@ variable "components" {
       command         = optional(list(string))
       ports           = optional(list(number), [])
       service = optional(object({
-        enabled = optional(bool, false)
-        labels  = optional(map(string), {})
+        enabled     = optional(bool, false)
+        annotations = optional(map(string), {})
+        labels      = optional(map(string), {})
       }), {})
       env = optional(
         object({
