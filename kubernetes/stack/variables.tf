@@ -90,8 +90,32 @@ variable "components" {
             values_override     = optional(map(string), {})
             from_field          = optional(map(string))
             from_field_override = optional(map(string), {})
-            from_secrets        = optional(set(string))
-            from_config_maps    = optional(set(string))
+            secret_refs = optional(map(object({
+              name = string,
+              key  = string
+            })))
+            secret_refs_override = optional(map(object({
+              name = string,
+              key  = string
+            })), {})
+            config_map_refs = optional(map(object({
+              name = string,
+              key  = string
+            })))
+            config_map_refs_override = optional(map(object({
+              name = string,
+              key  = string
+            })), {})
+            field_refs = optional(map(object({
+              api_version = optional(string, "v1"),
+              path        = string
+            })))
+            field_refs_override = optional(map(object({
+              api_version = optional(string, "v1"),
+              path        = string
+            })), {})
+            from_secrets     = optional(set(string))
+            from_config_maps = optional(set(string))
           }),
           {}
         )

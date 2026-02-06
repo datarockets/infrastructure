@@ -314,11 +314,79 @@ resource "kubernetes_deployment_v1" "this" {
               }
             }
 
+            dynamic "env" {
+              for_each = (
+                coalesce(init_container.value.image, each.value.image) == each.value.image
+                ? merge(
+                  coalesce(init_container.value.env.secret_refs, each.value.env.secret_refs),
+                  init_container.value.env.secret_refs_override,
+                )
+                : coalesce(init_container.value.env.secret_refs, {})
+              )
+              content {
+                name = env.key
+                value_from {
+                  secret_key_ref {
+                    name = (
+                      contains(local.stack_secret_names, env.value.name)
+                      ? kubernetes_secret_v1.this[env.value.name].metadata[0].name
+                      : data.kubernetes_secret_v1.external[env.value.name].metadata[0].name
+                    )
+                    key = env.value.key
+                  }
+                }
+              }
+            }
+
+            dynamic "env" {
+              for_each = (
+                coalesce(init_container.value.image, each.value.image) == each.value.image
+                ? merge(
+                  coalesce(init_container.value.env.config_map_refs, each.value.env.config_map_refs),
+                  init_container.value.env.config_map_refs_override,
+                )
+                : coalesce(init_container.value.env.config_map_refs, {})
+              )
+              content {
+                name = env.key
+                value_from {
+                  config_map_key_ref {
+                    name = (
+                      contains(local.stack_config_map_names, env.value.name)
+                      ? kubernetes_config_map_v1.this[env.value.name].metadata[0].name
+                      : data.kubernetes_config_map_v1.external[env.value.name].metadata[0].name
+                    )
+                    key = env.value.key
+                  }
+                }
+              }
+            }
+
+            dynamic "env" {
+              for_each = (
+                coalesce(init_container.value.image, each.value.image) == each.value.image
+                ? merge(
+                  coalesce(init_container.value.env.field_refs, each.value.env.field_refs),
+                  init_container.value.env.field_refs_override,
+                )
+                : coalesce(init_container.value.env.field_refs, {})
+              )
+              content {
+                name = env.key
+                value_from {
+                  field_ref {
+                    api_version = env.value.api_version
+                    field_path  = env.value.path
+                  }
+                }
+              }
+            }
+
             dynamic "env_from" {
               for_each = (
                 coalesce(init_container.value.image, each.value.image) == each.value.image
                 ? coalesce(init_container.value.env.from_secrets, each.value.env.from_secrets)
-                : init_container.value.env.from_secrets
+                : coalesce(init_container.value.env.from_secrets, [])
               )
               content {
                 secret_ref {
@@ -335,7 +403,7 @@ resource "kubernetes_deployment_v1" "this" {
               for_each = (
                 coalesce(init_container.value.image, each.value.image) == each.value.image
                 ? coalesce(init_container.value.env.from_config_maps, each.value.env.from_config_maps)
-                : init_container.value.env.from_config_maps
+                : coalesce(init_container.value.env.from_config_maps, {})
               )
               content {
                 config_map_ref {
