@@ -110,7 +110,7 @@ resource "kubernetes_deployment_v1" "this" {
           }
 
           dynamic "env" {
-            for_each = each.value.env.from_field
+            for_each = each.value.env.field_refs
             content {
               name = env.key
               value_from {
