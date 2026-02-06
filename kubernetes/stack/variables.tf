@@ -40,7 +40,19 @@ variable "components" {
       }), {})
       env = optional(
         object({
-          values           = optional(map(string), {})
+          values = optional(map(string), {})
+          secret_refs = optional(map(object({
+            name = string,
+            key  = string
+          })), {})
+          config_map_refs = optional(map(object({
+            name = string,
+            key  = string
+          })), {})
+          field_refs = optional(map(object({
+            api_version = optional(string, "v1"),
+            path        = string
+          })), {})
           from_field       = optional(map(string), {})
           from_secrets     = optional(set(string), [])
           from_config_maps = optional(set(string), [])

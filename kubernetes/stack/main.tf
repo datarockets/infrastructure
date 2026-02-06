@@ -6,6 +6,7 @@ locals {
     for _, component in var.components : [
       component.env.from_config_maps,
       coalesce(component.init_container.env.from_config_maps, []),
+      [for _, config_map_ref in component.env.config_map_refs : config_map_ref.name],
       [for mount in component.mounts : mount.config_map],
       [for mount in coalesce(component.init_container.mounts, []) : mount.config_map],
     ]
@@ -15,6 +16,7 @@ locals {
     for _, component in var.components : [
       component.env.from_secrets,
       coalesce(component.init_container.env.from_secrets, []),
+      [for _, secret_ref in component.env.secret_refs : secret_ref.name],
       [for mount in component.mounts : mount.secret],
       [for mount in coalesce(component.init_container.mounts, []) : mount.secret],
     ]

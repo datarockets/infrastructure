@@ -75,6 +75,53 @@ resource "kubernetes_deployment_v1" "this" {
             }
           }
 
+          dynamic "env" {
+            for_each = each.value.env.secret_refs
+            content {
+              name = env.key
+              value_from {
+                secret_key_ref {
+                  name = (
+                    contains(local.stack_secret_names, env.value.name)
+                    ? kubernetes_secret_v1.this[env.value.name].metadata[0].name
+                    : data.kubernetes_secret_v1.external[env.value.name].metadata[0].name
+                  )
+                  key = env.value.key
+                }
+              }
+            }
+          }
+
+          dynamic "env" {
+            for_each = each.value.env.config_map_refs
+            content {
+              name = env.key
+              value_from {
+                config_map_key_ref {
+                  name = (
+                    contains(local.stack_config_map_names, env.value.name)
+                    ? kubernetes_config_map_v1.this[env.value.name].metadata[0].name
+                    : data.kubernetes_config_map_v1.external[env.value.name].metadata[0].name
+                  )
+                  key = env.value.key
+                }
+              }
+            }
+          }
+
+          dynamic "env" {
+            for_each = each.value.env.from_field
+            content {
+              name = env.key
+              value_from {
+                field_ref {
+                  api_version = env.value.api_version
+                  field_path  = env.value.path
+                }
+              }
+            }
+          }
+
           dynamic "env_from" {
             for_each = each.value.env.from_secrets
             content {
