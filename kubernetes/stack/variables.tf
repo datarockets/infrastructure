@@ -11,7 +11,9 @@ variable "namespace" {
 variable "service_accounts" {
   type = map(
     object({
-      annotations = optional(map(string), {})
+      annotations       = optional(map(string), {})
+      roles             = optional(set(string), [])
+      image_pull_secret = optional(string)
     })
   )
   default = {}
