@@ -31,4 +31,8 @@ resource "kubernetes_service_v1" "this" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [metadata[0].annotations["cloud.google.com/neg"]]
+  }
 }
