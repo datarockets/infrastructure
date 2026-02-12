@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e -o pipefail
+cd "$(dirname "$0")/.."
+
+trivy config ./ --tf-exclude-downloaded-modules --skip-dirs examples --skip-dirs templates $@
